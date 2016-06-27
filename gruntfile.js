@@ -26,12 +26,16 @@ module.exports = function (grunt) {
       }
     },
     watch: {
+
+      //监听所有后台视图并重载
       serverViews: {
         files: defaultAssets.server.views,
         options: {
           livereload: true
         }
       },
+
+      //监听gruntfile.js和所有后台的js并执行检查后重载
       serverJS: {
         files: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.allJS),
         tasks: ['jshint'],
@@ -39,12 +43,16 @@ module.exports = function (grunt) {
           livereload: true
         }
       },
+
+      //对静态页面视图（前台）文件监控并重载
       clientViews: {
         files: defaultAssets.client.views,
         options: {
           livereload: true
         }
       },
+
+      //对所有前台的js执行检查，并自动重载
       clientJS: {
         files: defaultAssets.client.js,
         tasks: ['jshint'],
@@ -52,6 +60,9 @@ module.exports = function (grunt) {
           livereload: true
         }
       },
+
+
+      //对所有的css执行检查，并自动重载
       clientCSS: {
         files: defaultAssets.client.css,
         tasks: ['csslint'],
@@ -59,13 +70,8 @@ module.exports = function (grunt) {
           livereload: true
         }
       },
-      // clientSCSS: {
-      //   files: defaultAssets.client.sass,
-      //   tasks: ['sass', 'csslint'],
-      //   options: {
-      //     livereload: true
-      //   }
-      // },
+      
+      //先执行所有文件的less的编译，再执行css检查，并自动重载
       clientLESS: {
         files: defaultAssets.client.less,
         tasks: ['less', 'csslint'],
@@ -74,16 +80,24 @@ module.exports = function (grunt) {
         }
       }
     },
+
+    /*监听指定文件：1.gruntfile.js; 2.所有后台页面变动；3.所有后台js变动; 4.后台模块初始化配置文件
+    * 启动文件为根目录下的server.js文件，并传递debug参数给nodejs，启动debugging server，
+    * 指定听的文件为js,html
+    */
     nodemon: {
       dev: {
         script: 'server.js',
         options: {
           nodeArgs: ['--debug'],
           ext: 'js,html',
-          watch: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.views, defaultAssets.server.allJS, defaultAssets.server.config)
+          watch: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.views,
+            defaultAssets.server.allJS, defaultAssets.server.config)
         }
       }
     },
+
+    //默认并发的跑nodemon和watch。调试模式还启动node-inspector,并记录日志
     concurrent: {
       default: ['nodemon', 'watch'],
       debug: ['nodemon', 'watch', 'node-inspector'],
@@ -91,9 +105,14 @@ module.exports = function (grunt) {
         logConcurrentOutput: true
       }
     },
+
+
+    //检查1.gruntfile.js, 2.后台js; 3.客户端js；3.测试的所有js
+    //jshintrc：true，代表不需要传递任何的参数给jshint，它会自己去找.jshintrc文件来配置
     jshint: {
       all: {
-        src: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.allJS, defaultAssets.client.js, testAssets.tests.server, testAssets.tests.client, testAssets.tests.e2e),
+        src: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.allJS, defaultAssets.client.js, 
+          testAssets.tests.server, testAssets.tests.client, testAssets.tests.e2e),
         options: {
           jshintrc: true,
           node: true,
@@ -102,10 +121,16 @@ module.exports = function (grunt) {
         }
       }
     },
+
+    //执行eslint检查
     eslint: {
       options: {},
-      target: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.allJS, defaultAssets.client.js, testAssets.tests.server, testAssets.tests.client, testAssets.tests.e2e)
+      target: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.allJS, defaultAssets.client.js,
+        testAssets.tests.server, testAssets.tests.client, testAssets.tests.e2e)
     },
+
+
+    //对所有的css执行csslint检查，并使用根目录下的.csslint文件
     csslint: {
       options: {
         csslintrc: '.csslintrc'
@@ -114,6 +139,8 @@ module.exports = function (grunt) {
         src: defaultAssets.client.css
       }
     },
+
+    //生产模式将所有的客户端.js合并为一个application.js文件
     ngAnnotate: {
       production: {
         files: {
@@ -121,6 +148,9 @@ module.exports = function (grunt) {
         }
       }
     },
+
+
+    //生产模式下将application.js压缩
     uglify: {
       production: {
         options: {
@@ -131,6 +161,8 @@ module.exports = function (grunt) {
         }
       }
     },
+
+    //将所有的css压缩，并合并为一个application.min.css文件
     cssmin: {
       combine: {
         files: {
@@ -138,18 +170,8 @@ module.exports = function (grunt) {
         }
       }
     },
-    // sass: {
-    //   dist: {
-    //     files: [{
-    //       expand: true,
-    //       src: defaultAssets.client.sass,
-    //       ext: '.css',
-    //       rename: function (base, src) {
-    //         return src.replace('/scss/', '/css/');
-    //       }
-    //     }]
-    //   }
-    // },
+    
+    //ext:'.css'对所有的文件以.css重命名
     less: {
       dist: {
         files: [{
@@ -162,6 +184,8 @@ module.exports = function (grunt) {
         }]
       }
     },
+
+    //node调试插件
     'node-inspector': {
       custom: {
         options: {
@@ -175,6 +199,8 @@ module.exports = function (grunt) {
         }
       }
     },
+
+    //mocha测试
     mochaTest: {
       src: testAssets.tests.server,
       options: {
@@ -182,6 +208,8 @@ module.exports = function (grunt) {
         timeout: 10000
       }
     },
+
+    //然而mocha 伊斯坦布尔。。。。。。。。。。。。
     mocha_istanbul: {
       coverage: {
         src: testAssets.tests.server,
@@ -198,11 +226,15 @@ module.exports = function (grunt) {
         }
       }
     },
+
+    //karma测试
     karma: {
       unit: {
         configFile: 'karma.conf.js'
       }
     },
+
+    //度量测试？？
     protractor: {
       options: {
         configFile: 'protractor.conf.js',
@@ -215,10 +247,12 @@ module.exports = function (grunt) {
         }
       }
     },
+
+    //在config/env/目录下没有local.js的情况下，才拷贝config/env/local.example.js到config/env/local.example.js
     copy: {
       localConfig: {
         src: 'config/env/local.example.js',
-        dest: 'config/env/local.js',
+        dest: 'config/env/local.example.js',
         filter: function () {
           return !fs.existsSync('config/env/local.js');
         }
@@ -226,6 +260,8 @@ module.exports = function (grunt) {
     }
   });
 
+
+  
   grunt.event.on('coverage', function(lcovFileContents, done) {
     // Set coverage config so karma-coverage knows to run coverage
     testConfig.coverage = true;
@@ -237,11 +273,16 @@ module.exports = function (grunt) {
     });
   });
 
-  // Load NPM tasks
+  //加载package.json中的所有的grunt插件
   require('load-grunt-tasks')(grunt);
+
+  //加载grunt执行时间记录插件，执行完grunt任务之后可以看到每个任务的执行时间汇总
+  require('time-grunt')(grunt);
+
+  //加载度量覆盖测试任务？？
   grunt.loadNpmTasks('grunt-protractor-coverage');
 
-  // Make sure upload directory exists
+  //注册一个任务,创建upload文件夹
   grunt.task.registerTask('mkdir:upload', 'Task that makes sure upload directory exists.', function () {
     // Get the callback
     var done = this.async();
@@ -296,8 +337,7 @@ module.exports = function (grunt) {
     });
   });
 
-  // Lint CSS and JavaScript files.
-  // grunt.registerTask('lint', ['sass', 'less', 'jshint', 'eslint', 'csslint']);
+  // 1.执行Lsss编译； 2.执行jshint; 3.执行eslint; 4.执行csslint
   grunt.registerTask('lint', ['less', 'jshint', 'eslint', 'csslint']);
 
   // Lint project files and minify them into two production files.
@@ -311,7 +351,7 @@ module.exports = function (grunt) {
   // Run project coverage
   grunt.registerTask('coverage', ['env:test', 'lint', 'mocha_istanbul:coverage', 'karma:unit']);
 
-  // Run the project in development mode
+  // 1.设置环境为开发环境； 2.执行代码检查； 3.创建上传目录； 4.拷贝本地配置; 5.
   grunt.registerTask('default', ['env:dev', 'lint', 'mkdir:upload', 'copy:localConfig', 'concurrent:default']);
 
   // Run the project in debug mode
