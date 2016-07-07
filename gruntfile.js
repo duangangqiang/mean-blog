@@ -89,7 +89,7 @@ module.exports = function (grunt) {
       dev: {
         script: 'server.js',
         options: {
-          nodeArgs: ['--debug'],
+          nodeArgs: ['--debug-brk'],
           ext: 'js,html',
           watch: _.union(defaultAssets.server.gruntConfig, defaultAssets.server.views,
             defaultAssets.server.allJS, defaultAssets.server.config)
@@ -189,13 +189,13 @@ module.exports = function (grunt) {
     'node-inspector': {
       custom: {
         options: {
-          'web-port': 1337,
-          'web-host': 'localhost',
-          'debug-port': 5858,
-          'save-live-edit': true,
-          'no-preload': true,
-          'stack-trace-limit': 50,
-          'hidden': []
+          'web-port': 1337, //Port to host the inspector. Type: Number Default: 8080
+          'web-host': 'localhost', //Host to listen on. Type: String Default: '0.0.0.0'
+          'debug-port': 5858, //Port to connect to the debugging app. Type: Number Default: 5858
+          'save-live-edit': true, //Save live edit changes to disk. Type: Boolean Default: false
+          'preload': true, //no preload code
+          'stack-trace-limit': 50, //Number of stack frames to show on a breakpoint. Type: Number Default: 50
+          'hidden': [] //Array of files to hide from the UI (breakpoints in these files will be ignored).
         }
       }
     },
@@ -259,8 +259,6 @@ module.exports = function (grunt) {
       }
     }
   });
-
-
   
   grunt.event.on('coverage', function(lcovFileContents, done) {
     // Set coverage config so karma-coverage knows to run coverage
@@ -284,7 +282,7 @@ module.exports = function (grunt) {
 
   //注册一个任务,创建upload文件夹
   grunt.task.registerTask('mkdir:upload', 'Task that makes sure upload directory exists.', function () {
-    // Get the callback
+    // Get the callback 使任务异步执行
     var done = this.async();
 
     grunt.file.mkdir(path.normalize(__dirname + '/modules/users/client/img/profile/uploads'));
@@ -292,26 +290,23 @@ module.exports = function (grunt) {
     done();
   });
 
-  // Connect to the MongoDB instance and load the models
+  //尝试连接mongodb数据库，并加载应用的所有模型
   grunt.task.registerTask('mongoose', 'Task that connects to the MongoDB instance and loads the application models.', function () {
-    // Get the callback
     var done = this.async();
 
-    // Use mongoose configuration
+    //获取mongoose的配置
     var mongoose = require('./config/lib/mongoose.js');
 
-    // Connect to database
+    // 连接数据库
     mongoose.connect(function (db) {
       done();
     });
   });
 
-  // Drops the MongoDB database, used in e2e testing
+  // 在e2e测试中的删除数据库
   grunt.task.registerTask('dropdb', 'drop the database', function () {
-    // async mode
+    
     var done = this.async();
-
-    // Use mongoose configuration
     var mongoose = require('./config/lib/mongoose.js');
 
     mongoose.connect(function (db) {
@@ -326,8 +321,8 @@ module.exports = function (grunt) {
     });
   });
 
+  //仅仅启动服务
   grunt.task.registerTask('server', 'Starting the server', function () {
-    // Get the callback
     var done = this.async();
 
     var path = require('path');
@@ -337,26 +332,25 @@ module.exports = function (grunt) {
     });
   });
 
-  // 1.执行Lsss编译； 2.执行jshint; 3.执行eslint; 4.执行csslint
+  // 1.执行Lsss编译；2.执行jshint; 3.执行eslint; 4.执行csslint
   grunt.registerTask('lint', ['less', 'jshint', 'eslint', 'csslint']);
 
-  // Lint project files and minify them into two production files.
+  //构建任务：1.设置环境为开发环境；2.执行静态代码检查；3.合并前台业务代码；4.压缩前台js文件；5.压缩css
   grunt.registerTask('build', ['env:dev', 'lint', 'ngAnnotate', 'uglify', 'cssmin']);
 
-  // Run the project tests
+  //测试
   grunt.registerTask('test', ['env:test', 'lint', 'mkdir:upload', 'copy:localConfig', 'server', 'mochaTest', 'karma:unit', 'protractor']);
   grunt.registerTask('test:server', ['env:test', 'lint', 'server', 'mochaTest']);
   grunt.registerTask('test:client', ['env:test', 'lint', 'karma:unit']);
   grunt.registerTask('test:e2e', ['env:test', 'lint', 'dropdb', 'server', 'protractor']);
-  // Run project coverage
   grunt.registerTask('coverage', ['env:test', 'lint', 'mocha_istanbul:coverage', 'karma:unit']);
 
   // 1.设置环境为开发环境； 2.执行代码检查； 3.创建上传目录； 4.拷贝本地配置; 5.
   grunt.registerTask('default', ['env:dev', 'lint', 'mkdir:upload', 'copy:localConfig', 'concurrent:default']);
 
-  // Run the project in debug mode
+  // 调试模式启动
   grunt.registerTask('debug', ['env:dev', 'lint', 'mkdir:upload', 'copy:localConfig', 'concurrent:debug']);
 
-  // Run the project in production mode
+  // 生产环境启动
   grunt.registerTask('prod', ['build', 'env:prod', 'mkdir:upload', 'copy:localConfig', 'concurrent:default']);
 };

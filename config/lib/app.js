@@ -16,25 +16,32 @@ function seedDB() {
   }
 }
 
-// Initialize Models
+// 此方法在被第一次依赖的时候调用，加载mongoose模型
 mongoose.loadModels(seedDB);
 
 module.exports.loadModels = function loadModels() {
   mongoose.loadModels();
 };
 
+
+/*初始化*/
 module.exports.init = function init(callback) {
+  
+  //1.先连接mongodb数据库
   mongoose.connect(function (db) {
-    // Initialize express
+    
+    // 2.初始化Express
     var app = express.init(db);
     if (callback) callback(app, db, config);
 
   });
 };
 
+/*应用主启动方法*/
 module.exports.start = function start(callback) {
   var _this = this;
 
+  //初始化
   _this.init(function (app, db, config) {
 
     // Start the app by listening on <port>

@@ -3,14 +3,14 @@
 /**
  * Module dependencies.
  */
-var _ = require('lodash'),
-  chalk = require('chalk'),
-  glob = require('glob'),
+var _ = require('lodash'), //工具库，类似underscore
+  chalk = require('chalk'),//控制台各种颜色的输出
+  glob = require('glob'), //使用 minimatch 库来实现匹配
   fs = require('fs'),
   path = require('path');
 
 /**
- * Get files by glob patterns
+ * 使用glob匹配来获取文件
  */
 var getGlobbedPaths = function (globPatterns, excludes) {
   // URL paths regex
@@ -49,26 +49,31 @@ var getGlobbedPaths = function (globPatterns, excludes) {
 };
 
 /**
- * Validate NODE_ENV existence
+ * 验证环境变量 NODE_ENV 是否存在
  */
 var validateEnvironmentVariable = function () {
+
+  //根据当前的NODE_ENV获取相对应的环境配置文件
   var environmentFiles = glob.sync('./config/env/' + process.env.NODE_ENV + '.js');
   console.log();
+
+  //如果没有找到与之对应的环境配置文件
   if (!environmentFiles.length) {
     if (process.env.NODE_ENV) {
       console.error(chalk.red('+ Error: No configuration file found for "' + process.env.NODE_ENV + '" environment using development instead'));
     } else {
       console.error(chalk.red('+ Error: NODE_ENV is not defined! Using default development environment'));
     }
+
+    //不管是没有找到环境配置文件还是没有环境参数，默认使用development做为启动环境
     process.env.NODE_ENV = 'development';
   }
-  // Reset console color
+  // 重置控制台颜色
   console.log(chalk.white(''));
 };
 
 /**
- * Validate Secure=true parameter can actually be turned on
- * because it requires certs and key files to be available
+ *  验证 Secure = true 参数是否能够正确的启动，因为这个要有证书和key才可用
  */
 var validateSecureMode = function (config) {
 
@@ -88,7 +93,7 @@ var validateSecureMode = function (config) {
 };
 
 /**
- * Validate Session Secret parameter is not set to default in production
+ *  验证在生产环境中Session Secret参数没有被设置为默认值
  */
 var validateSessionSecret = function (config, testing) {
 
@@ -110,103 +115,101 @@ var validateSessionSecret = function (config, testing) {
 };
 
 /**
- * Initialize global configuration files
+ * 初始化全局的配置文件夹
  */
 var initGlobalConfigFolders = function (config, assets) {
-  // Appending files
   config.folders = {
     server: {},
     client: {}
   };
 
-  // Setting globbed client paths
+  // 所有的前台的文件夹
   config.folders.client = getGlobbedPaths(path.join(process.cwd(), 'modules/*/client/'), process.cwd().replace(new RegExp(/\\/g), '/'));
 };
 
 /**
- * Initialize global configuration files
+ * 初始化全局配置文件
  */
 var initGlobalConfigFiles = function (config, assets) {
-  // Appending files
+  // 初始化
   config.files = {
     server: {},
     client: {}
   };
 
-  // Setting Globbed model files
+  // 设置全局的数据模型对象
   config.files.server.models = getGlobbedPaths(assets.server.models);
 
-  // Setting Globbed route files
+  // 设置全局的后台路由
   config.files.server.routes = getGlobbedPaths(assets.server.routes);
 
-  // Setting Globbed config files
+  // 设置后台的配置文件
   config.files.server.configs = getGlobbedPaths(assets.server.config);
 
-  // Setting Globbed socket files
+  // 设置全部的sockets文件
   config.files.server.sockets = getGlobbedPaths(assets.server.sockets);
 
-  // Setting Globbed policies files
+  // 设置全局的策略
   config.files.server.policies = getGlobbedPaths(assets.server.policies);
 
-  // Setting Globbed js files
+  // 设置全局的前台Js
   config.files.client.js = getGlobbedPaths(assets.client.lib.js, 'public/').concat(getGlobbedPaths(assets.client.js, ['public/']));
 
-  // Setting Globbed css files
+  // 设置全局的前台css
   config.files.client.css = getGlobbedPaths(assets.client.lib.css, 'public/').concat(getGlobbedPaths(assets.client.css, ['public/']));
 
-  // Setting Globbed test files
+  // 设置全局的测试
   config.files.client.tests = getGlobbedPaths(assets.client.tests);
 };
 
 /**
- * Initialize global configuration
+ * 初始化全局配置
  */
 var initGlobalConfig = function () {
-  // Validate NODE_ENV existence
+  // 验证环境变量 NODE_ENV 的存在
   validateEnvironmentVariable();
 
-  // Get the default assets
+  // 获取默认的资源文件 其中process.cwd()：获取当前进程工作的文件路径
   var defaultAssets = require(path.join(process.cwd(), 'config/assets/default'));
 
-  // Get the current assets
+  // 根据NODE_ENV获取当前环境的资源文件
   var environmentAssets = require(path.join(process.cwd(), 'config/assets/', process.env.NODE_ENV)) || {};
 
-  // Merge assets
+  // 合并资源文件
   var assets = _.merge(defaultAssets, environmentAssets);
 
-  // Get the default config
+  // 获取环境默认的配置
   var defaultConfig = require(path.join(process.cwd(), 'config/env/default'));
 
-  // Get the current config
+  // 获取当前环境的配置
   var environmentConfig = require(path.join(process.cwd(), 'config/env/', process.env.NODE_ENV)) || {};
 
-  // Merge config files
+  // 合并配置
   var config = _.merge(defaultConfig, environmentConfig);
 
-  // read package.json for MEAN.JS project information
+  // 读取package.json的配置，使用config.meanjs存起来
   var pkg = require(path.resolve('./package.json'));
   config.meanjs = pkg;
 
-  // We only extend the config object with the local.js custom/local environment if we are on
-  // production or development environment. If test environment is used we don't merge it with local.js
-  // to avoid running test suites on a prod/dev environment (which delete records and make modifications)
+  // 只有在开发或者生产环境的时候才使用loacl.js来覆盖配置，在测试的时候不，为的是避免在生产或者开发环境中
+  // 跑测试用例带来数据改变
   if (process.env.NODE_ENV !== 'test') {
     config = _.merge(config, (fs.existsSync(path.join(process.cwd(), 'config/env/local.js')) && require(path.join(process.cwd(), 'config/env/local.js'))) || {});
   }
 
-  // Initialize global globbed files
+  // 初始化全局配置文件
   initGlobalConfigFiles(config, assets);
 
-  // Initialize global globbed folders
+  // 设置全局的文件夹
   initGlobalConfigFolders(config, assets);
 
-  // Validate Secure SSL mode can be used
+  // 验证使用安全的SSL模式
   validateSecureMode(config);
 
-  // Validate session secret
+  // 验证Sessionq安全
   validateSessionSecret(config);
 
-  // Expose configuration utilities
+  // 暴露配置工具方法
   config.utils = {
     getGlobbedPaths: getGlobbedPaths,
     validateSessionSecret: validateSessionSecret
@@ -216,6 +219,6 @@ var initGlobalConfig = function () {
 };
 
 /**
- * Set configuration object
+ * 设置配置对象
  */
 module.exports = initGlobalConfig();

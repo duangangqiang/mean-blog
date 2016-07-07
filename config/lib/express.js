@@ -5,7 +5,7 @@
  */
 var config = require('../config'),
   express = require('express'),
-  morgan = require('morgan'),
+  morgan = require('morgan'), //HTTP request logger middleware
   logger = require('./logger'),
   bodyParser = require('body-parser'),
   session = require('express-session'),
@@ -20,7 +20,7 @@ var config = require('../config'),
   path = require('path');
 
 /**
- * Initialize local variables
+ * 初始化本地变量
  */
 module.exports.initLocalVariables = function (app) {
   // Setting application local variables
@@ -214,10 +214,9 @@ module.exports.configureSocketIO = function (app, db) {
 };
 
 /**
- * Initialize the Express application
+ * 初始化Express应用
  */
 module.exports.init = function (db) {
-  // Initialize express app
   var app = express();
 
   // Initialize local variables
