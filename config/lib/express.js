@@ -6,12 +6,12 @@
 var config = require('../config'),
   express = require('express'),
   morgan = require('morgan'), //HTTP request logger middleware
-  logger = require('./logger'),
+  logger = require('./logger'), //日志配置
   bodyParser = require('body-parser'),
   session = require('express-session'),
   MongoStore = require('connect-mongo')(session),
   favicon = require('serve-favicon'),
-  compress = require('compression'),
+  compress = require('compression'), //压缩
   methodOverride = require('method-override'),
   cookieParser = require('cookie-parser'),
   helmet = require('helmet'),
@@ -23,17 +23,23 @@ var config = require('../config'),
  * 初始化本地变量
  */
 module.exports.initLocalVariables = function (app) {
-  // Setting application local variables
-  app.locals.title = config.app.title;
-  app.locals.description = config.app.description;
+  // 设置项目的本地变量
+  app.locals.title = config.app.title; //页面的title
+  app.locals.description = config.app.description; //页面的description
   if (config.secure && config.secure.ssl === true) {
     app.locals.secure = config.secure.ssl;
   }
-  app.locals.keywords = config.app.keywords;
+  app.locals.keywords = config.app.keywords; //关键字
+
+  //各个登陆的id
   app.locals.googleAnalyticsTrackingID = config.app.googleAnalyticsTrackingID;
   app.locals.facebookAppId = config.facebook.clientID;
+  
+  //用于页面中迭代加载的js和css
   app.locals.jsFiles = config.files.client.js;
   app.locals.cssFiles = config.files.client.css;
+  
+  //自动重载
   app.locals.livereload = config.livereload;
   app.locals.logo = config.logo;
   app.locals.favicon = config.favicon;
@@ -47,54 +53,56 @@ module.exports.initLocalVariables = function (app) {
 };
 
 /**
- * Initialize application middleware
+ * 初始化中间件
  */
 module.exports.initMiddleware = function (app) {
-  // Showing stack errors
+  // 显示堆栈错误
   app.set('showStackError', true);
 
-  // Enable jsonp
+  // 启动jsonp
   app.enable('jsonp callback');
 
-  // Should be placed before express.static
+  // 必须放在 express.static 之前
   app.use(compress({
+
+    //过滤出需要压缩的请求， level:9 代表最高压缩模式 Best compression (also zlib.Z_BEST_COMPRESSION).
     filter: function (req, res) {
       return (/json|text|javascript|css|font|svg/).test(res.getHeader('Content-Type'));
     },
     level: 9
   }));
 
-  // Initialize favicon middleware
+  // 初始化 favicon 中间件
   app.use(favicon(app.locals.favicon));
 
-  // Enable logger (morgan)
+  // 启动日志记录工具 (morgan)
   app.use(morgan(logger.getFormat(), logger.getOptions()));
 
-  // Environment dependent middleware
+  // 环境依赖中间件
   if (process.env.NODE_ENV === 'development') {
-    // Disable views cache
+    // 禁用视图缓存
     app.set('view cache', false);
   } else if (process.env.NODE_ENV === 'production') {
     app.locals.cache = 'memory';
   }
 
-  // Request body parsing middleware should be above methodOverride
+  // 请求体解析中间件必须在 methodOverride 之前
   app.use(bodyParser.urlencoded({
     extended: true
   }));
   app.use(bodyParser.json());
   app.use(methodOverride());
 
-  // Add the cookie parser and flash middleware
+  // cookie解析器和flash输出
   app.use(cookieParser());
   app.use(flash());
 };
 
 /**
- * Configure view engine
+ * 配置视图引擎
  */
 module.exports.initViewEngine = function (app) {
-  // Set swig as the template engine
+  // 设置 swig 作为视图引擎
   app.engine('server.view.html', consolidate[config.templateEngine]);
 
   // Set views path and view engine
@@ -103,7 +111,7 @@ module.exports.initViewEngine = function (app) {
 };
 
 /**
- * Configure Express session
+ * 配置Express session
  */
 module.exports.initSession = function (app, db) {
   // Express MongoDB session storage
@@ -125,7 +133,7 @@ module.exports.initSession = function (app, db) {
 };
 
 /**
- * Invoke modules server configuration
+ * 调用各个模块的服务配置 如core articles server下的config
  */
 module.exports.initModulesConfiguration = function (app, db) {
   config.files.server.configs.forEach(function (configPath) {
@@ -138,6 +146,7 @@ module.exports.initModulesConfiguration = function (app, db) {
  */
 module.exports.initHelmetHeaders = function (app) {
   // Use helmet to secure Express headers
+  // Helmet helps you secure your Express apps by setting various HTTP headers
   var SIX_MONTHS = 15778476000;
   app.use(helmet.xframe());
   app.use(helmet.xssFilter());
@@ -152,40 +161,39 @@ module.exports.initHelmetHeaders = function (app) {
 };
 
 /**
- * Configure the modules static routes
+ * 配置模块的静态资源路由
  */
 module.exports.initModulesClientRoutes = function (app) {
-  // Setting the app router and static folder
+  // 设置app的路由和静态文件路径
   app.use('/', express.static(path.resolve('./public')));
 
-  // Globbing static routing
+  // 各个模块的静态文件路由
   config.folders.client.forEach(function (staticPath) {
     app.use(staticPath, express.static(path.resolve('./' + staticPath)));
   });
 };
 
 /**
- * Configure the modules ACL policies
+ *  配置模块的路由的权限策略
  */
 module.exports.initModulesServerPolicies = function (app) {
-  // Globbing policy files
+  // 全局抓取的ACL 策略文件
   config.files.server.policies.forEach(function (policyPath) {
     require(path.resolve(policyPath)).invokeRolesPolicies();
   });
 };
 
 /**
- * Configure the modules server routes
+ * 配置模块的后台路由
  */
 module.exports.initModulesServerRoutes = function (app) {
-  // Globbing routing files
   config.files.server.routes.forEach(function (routePath) {
     require(path.resolve(routePath))(app);
   });
 };
 
 /**
- * Configure error handling
+ * 配置错误处理路由
  */
 module.exports.initErrorRoutes = function (app) {
   app.use(function (err, req, res, next) {
@@ -203,7 +211,7 @@ module.exports.initErrorRoutes = function (app) {
 };
 
 /**
- * Configure Socket.io
+ * 配置Socket.io
  */
 module.exports.configureSocketIO = function (app, db) {
   // Load the Socket.io configuration

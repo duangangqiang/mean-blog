@@ -5,6 +5,11 @@
  */
 var acl = require('acl');
 
+// When you develop a web site or application you will soon notice that sessions are not enough
+// to protect all the available resources. Avoiding that malicious users access other users 
+// content proves a much more complicated task than anticipated. ACL can solve this problem 
+// in a flexible and elegant way.
+
 // Using the memory backend
 acl = new acl(new acl.memoryBackend());
 
