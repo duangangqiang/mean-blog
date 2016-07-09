@@ -1,20 +1,20 @@
 <section ng-controller="ArticlesController" ng-init="find()">
   <div class="page-header">
-    <h1>Articles</h1>
+    <h1>所有博客</h1>
   </div>
   <div class="list-group">
     <a ng-repeat="article in articles" ui-sref="articles.view({articleId: article._id})" class="list-group-item">
       <small class="list-group-item-text">
-        Posted on
-        <span ng-bind="article.created | date:'mediumDate'"></span>
-        by
+        由
         <span ng-bind="article.user.displayName"></span>
+        发布于
+        <span ng-bind="article.created | date:'mediumDate'"></span>
       </small>
       <h4 class="list-group-item-heading" ng-bind="article.title"></h4>
       <p class="list-group-item-text" ng-bind="article.content"></p>
     </a>
   </div>
   <div class="alert alert-warning text-center" ng-if="articles.$resolved && !articles.length">
-    No articles yet, why don't you <a ui-sref="articles.create">create one</a>?
+    当前还没有博客，为啥不 <a ui-sref="articles.create">创建一个</a>呢?
   </div>
 </section>

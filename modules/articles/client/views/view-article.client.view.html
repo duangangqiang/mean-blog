@@ -12,10 +12,10 @@
   </div>
   <small>
     <em class="text-muted">
-      Posted on
-      <span ng-bind="article.created | date:'mediumDate'"></span>
-      by
+      由
       <span ng-bind="article.user.displayName"></span>
+      发布于
+      <span ng-bind="article.created | date:'mediumDate'"></span>
     </em>
   </small>
   <p class="lead" ng-bind="article.content"></p>
