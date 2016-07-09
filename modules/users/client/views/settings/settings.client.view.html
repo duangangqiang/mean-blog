@@ -1,18 +1,18 @@
 <section ng-controller="SettingsController">
   <div class="page-header">
-    <h1>Settings</h1>
+    <h1>设置</h1>
   </div>
   <div class="row">
     <nav class="col-sm-3 col-md-3">
       <ul class="nav nav-pills nav-stacked">
         <li ui-sref-active="active">
-          <a ui-sref="settings.profile">Edit Profile</a>
+          <a ui-sref="settings.profile">编辑个人信息</a>
         </li>
         <li ui-sref-active="active">
-          <a ui-sref="settings.picture">Change Profile Picture</a>
+          <a ui-sref="settings.picture">修改头像</a>
         </li>
         <li ui-sref-active="active" ng-show="user.provider === 'local'">
-          <a ui-sref="settings.password">Change Password</a>
+          <a ui-sref="settings.password">修改密码</a>
         </li>
       </ul>
     </nav>
