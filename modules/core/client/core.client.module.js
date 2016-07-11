@@ -1,6 +1,6 @@
 'use strict';
 
-// Use Applicaion configuration module to register a new module
+// 使用ApplicationConfiguration模块来注册一个新的模块core
 ApplicationConfiguration.registerModule('core');
 ApplicationConfiguration.registerModule('core.admin', ['core']);
 ApplicationConfiguration.registerModule('core.admin.routes', ['ui.router']);

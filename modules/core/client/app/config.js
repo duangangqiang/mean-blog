@@ -1,17 +1,17 @@
 'use strict';
 
-// Init the application configuration module for AngularJS application
+// 初始化Angularjs的模块配置， 直接这样写会将整个返回对象附着在window上
 var ApplicationConfiguration = (function () {
-  // Init module configuration options
+  // 模块名和模块依赖
   var applicationModuleName = 'blog';
   var applicationModuleVendorDependencies = ['ngResource', 'ngAnimate', 'ngMessages', 'ui.router', 'ui.bootstrap', 'ui.utils', 'angularFileUpload'];
 
-  // Add a new vertical module
+  // 添加一个竖向模块，或者说是独立的模块
   var registerModule = function (moduleName, dependencies) {
     // Create angular module
     angular.module(moduleName, dependencies || []);
 
-    // Add the module to the AngularJS configuration file
+    // 把模块添加的angularjs的配置中 
     angular.module(applicationModuleName).requires.push(moduleName);
   };
 
