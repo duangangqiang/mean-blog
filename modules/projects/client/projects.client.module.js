@@ -1,4 +1,4 @@
 'use strict';
 
-// Use Applicaion configuration module to register a new module
-ApplicationConfiguration.registerModule('articles');
+// 注册一个项目模块
+ApplicationConfiguration.registerModule('projects');

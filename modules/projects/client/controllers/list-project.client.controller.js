@@ -3,7 +3,7 @@
 // 所有项目控制器
 angular.module('projects').controller('ListProjectsController', ['$scope', '$stateParams', '$location', 'Authentication', 'Projects',
   function ($scope, $stateParams, $location, Authentication, Projects) {
-    $scope.authentication = Authentication
+    $scope.authentication = Authentication;
 
     // 查询所有项目
     $scope.find = function () {

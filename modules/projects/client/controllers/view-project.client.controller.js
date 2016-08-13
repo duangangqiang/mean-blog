@@ -30,3 +30,4 @@ angular.module('projects').controller('ViewProjectController', ['$scope', '$stat
     };
   }
 ]);
+  
