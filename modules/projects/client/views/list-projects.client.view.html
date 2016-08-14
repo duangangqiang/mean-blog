@@ -1,0 +1,20 @@
+<section ng-controller="ListProjectsController" ng-init="find()">
+  <div class="page-header">
+    <h1>所有项目</h1>
+  </div>
+  <div class="list-group">
+    <a ng-repeat="project in projects" ui-sref="projects.view({projectId: project._id})" class="list-group-item">
+      <small class="list-group-item-text">
+        由
+        <span ng-bind="project.user.displayName"></span>
+        发布于
+        <span ng-bind="project.created | date:'mediumDate'"></span>
+      </small>
+      <h4 class="list-group-item-heading" ng-bind="project.name"></h4>
+      <p class="list-group-item-text" ng-bind="project.description"></p>
+    </a>
+  </div>
+  <div class="alert alert-warning text-center" ng-if="projects.$resolved && !projects.length">
+    当前还没有博客，为啥不 <a ui-sref="projects.create">创建一个</a>呢?
+  </div>
+</section>

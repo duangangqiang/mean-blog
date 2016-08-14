@@ -10,9 +10,7 @@ angular.module('projects').controller('EditProjectController', ['$scope', '$stat
       $scope.error = null;
 
       if (!isValid) {
-
-        //metodo articleForm
-        $scope.$broadcast('show-errors-check-validity', 'articleForm');
+        $scope.$broadcast('show-errors-check-validity', 'editProjectForm');
 
         return false;
       }

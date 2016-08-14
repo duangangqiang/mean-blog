@@ -90,7 +90,7 @@ exports.list = function (req, res) {
 /**
  * 项目中间件
  */
-exports.articleByID = function (req, res, next, id) {
+exports.projectByID = function (req, res, next, id) {
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).send({
@@ -98,7 +98,7 @@ exports.articleByID = function (req, res, next, id) {
     });
   }
 
-  Article.findById(id).populate('user', 'displayName').exec(function (err, project) {
+  Project.findById(id).populate('user', 'displayName').exec(function (err, project) {
     if (err) {
       return next(err);
     } else if (!project) {

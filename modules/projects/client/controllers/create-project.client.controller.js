@@ -10,17 +10,15 @@ angular.module('projects').controller('CreateProjectController', ['$scope', '$st
       $scope.error = null;
 
       if (!isValid) {
-
-        //metodo articleForm要添加
-        $scope.$broadcast('show-errors-check-validity', 'articleForm');
+        $scope.$broadcast('show-errors-check-validity', 'cerateProjectForm');
 
         return false;
       }
 
       // 创建一个新的项目 metodo 项目字段
       var project = new Projects({
-        title: this.title,
-        content: this.content
+        name: this.name,
+        description: this.description
       });
 
       // 保存之后重定向到项目详情
@@ -28,8 +26,8 @@ angular.module('projects').controller('CreateProjectController', ['$scope', '$st
         $location.path('projects/' + response._id);
 
         // 清空表单字段 metodo 项目字段
-        $scope.title = '';
-        $scope.content = '';
+        $scope.name = '';
+        $scope.description = '';
       }, function (errorResponse) {
         $scope.error = errorResponse.data.message;
       });

@@ -24,7 +24,7 @@ angular.module('projects').controller('ViewProjectController', ['$scope', '$stat
         }
       } else {
         $scope.project.$remove(function () {
-          $location.path('projects');
+          $location.path('projects/list');
         });
       }
     };

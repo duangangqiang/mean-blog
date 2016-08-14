@@ -5,66 +5,66 @@
  */
 var acl = require('acl');
 
-// Using the memory backend
+// 使用内存后端
 acl = new acl(new acl.memoryBackend());
 
 /**
- * Invoke Articles Permissions
+ * 调用项目的权限
  */
 exports.invokeRolesPolicies = function () {
   acl.allow([{
     roles: ['admin'],
     allows: [{
-      resources: '/api/articles',
+      resources: '/api/projects',
       permissions: '*'
     }, {
-      resources: '/api/articles/:articleId',
+      resources: '/api/projects/:projectId',
       permissions: '*'
     }]
   }, {
     roles: ['user'],
     allows: [{
-      resources: '/api/articles',
+      resources: '/api/projects',
       permissions: ['get', 'post']
     }, {
-      resources: '/api/articles/:articleId',
+      resources: '/api/projects/:projectId',
       permissions: ['get']
     }]
   }, {
     roles: ['guest'],
     allows: [{
-      resources: '/api/articles',
+      resources: '/api/projects',
       permissions: ['get']
     }, {
-      resources: '/api/articles/:articleId',
+      resources: '/api/projects/:projectId',
       permissions: ['get']
     }]
   }]);
 };
 
 /**
- * Check If Articles Policy Allows
+ * 检查项目权限
  */
 exports.isAllowed = function (req, res, next) {
   var roles = (req.user) ? req.user.roles : ['guest'];
 
-  // If an article is being processed and the current user created it then allow any manipulation
-  if (req.article && req.user && req.article.user.id === req.user.id) {
+  // 如果一个项目正在处理中，且当前用户又是项目创建者，就直接允许
+  if (req.project && req.user && req.project.user.id === req.user.id) {
     return next();
   }
 
-  // Check for user roles
+  // 检查用户的角色
   acl.areAnyRolesAllowed(roles, req.route.path, req.method.toLowerCase(), function (err, isAllowed) {
     if (err) {
-      // An authorization error occurred.
-      return res.status(500).send('Unexpected authorization error');
+      // 发生认证错误
+      return res.status(500).send('未知认证错误');
     } else {
       if (isAllowed) {
-        // Access granted! Invoke next middleware
+        // 授予访问授权，并触发中间件
         return next();
       } else {
         return res.status(403).json({
-          message: 'User is not authorized'
+          message: '认证失败'
         });
       }
     }

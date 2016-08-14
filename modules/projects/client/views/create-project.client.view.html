@@ -1,0 +1,28 @@
+<section ng-controller="CreateProjectController">
+  <div class="page-header">
+    <h1>创建项目</h1>
+  </div>
+  <div class="col-md-12">
+    <form name="cerateProjectForm" class="form-horizontal" ng-submit="create(cerateProjectForm.$valid)" novalidate>
+      <fieldset>
+        <div class="form-group" show-errors>
+          <label for="name">名称</label>
+          <input name="name" type="text" ng-model="name" id="name" class="form-control" placeholder="Name" required>
+          <div ng-messages="cerateProjectForm.title.$error" role="alert">
+            <p class="help-block error-text" ng-message="required">项目名称必填.</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="description">内容</label>
+          <textarea name="description" ng-model="description" id="description" class="form-control" cols="30" rows="10" placeholder="Description"></textarea>
+        </div>
+        <div class="form-group">
+          <input type="submit" class="btn btn-default">
+        </div>
+        <div ng-show="error" class="text-danger">
+          <strong ng-bind="error"></strong>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</section>
